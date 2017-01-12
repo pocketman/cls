@@ -5,10 +5,33 @@
 # See documentation in:
 # http://doc.scrapy.org/en/latest/topics/items.html
 
+import re
 import scrapy
+from collections import defaultdict
+from scrapy.loader.processors import TakeFirst, MapCompose
+
+def striphtmlandnonunicode(data):
+    p1 = re.compile(r'<.*?>')
+    p2 = re.compile(r'[^\x00-\x7f]')
+    data = p1.sub('', data)
+    return p2.sub('', data)
 
 
-class ScraperItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+class TableItem(scrapy.Item):
+  """An Item that creates fields dynamically"""
+  fields = defaultdict(scrapy.Field)
+
+  def __init__(self, thead_selector, trow_selector):
+    headers = thead_selector.xpath('.//tr/th/text()').extract()
+    values = trow_selector.xpath('.//td').extract()
+    self._values = defaultdict(
+      scrapy.Field,
+      zip(
+        [str(x).lower().strip().replace(" ", "_").replace(",", "") for x in headers],
+        [str(striphtmlandnonunicode(x)).lower().strip() for x in values]
+      )
+    )
+
+class FlexItem(scrapy.Item):
+  """An Item with dynamic fields"""
+  fields = defaultdict(scrapy.Field)
