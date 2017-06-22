@@ -1,2 +1,4 @@
 venv/*
 scraper/*.json
+*.pyc
+*.swp

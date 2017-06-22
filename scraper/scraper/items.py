@@ -4,18 +4,10 @@
 #
 # See documentation in:
 # http://doc.scrapy.org/en/latest/topics/items.html
-
-import re
 import scrapy
 from collections import defaultdict
 from scrapy.loader.processors import TakeFirst, MapCompose
-
-def striphtmlandnonunicode(data):
-    p1 = re.compile(r'<.*?>')
-    p2 = re.compile(r'[^\x00-\x7f]')
-    data = p1.sub('', data)
-    return p2.sub('', data)
-
+from scraper.utils import striphtmlandnonunicode
 
 class TableItem(scrapy.Item):
   """An Item that creates fields dynamically"""
